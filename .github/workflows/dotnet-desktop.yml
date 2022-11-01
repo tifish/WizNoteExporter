@@ -2,40 +2,45 @@ name: Build and release
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
-    runs-on: windows-latest  # For a list of available runner types, refer to
-                             # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
+    runs-on: windows-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    # Install the .NET Core workload
-    - name: Install .NET Core
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 6.0.x
+      # Install the .NET Core workload
+      - name: Install .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
 
-    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
-    - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.0.2
+      # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
+      - name: Setup MSBuild.exe
+        uses: microsoft/setup-msbuild@v1.0.2
 
-    - name: Setup Nuget
-      uses: Nuget/setup-nuget@v1.0.5
+      - name: Setup Nuget
+        uses: Nuget/setup-nuget@v1.0.5
 
-    - name: Restore nuget packages
-      run: nuget restore WizNoteExporter.sln
+      - name: Restore nuget packages
+        run: nuget restore WizNoteExporter.sln
 
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
 
-    - name: Archive Release
-      uses: thedoctor0/zip-release@main
-      with:
-        type: 'zip'
-        filename: 'WizNoteExporter.zip'
-        exclusions: '/bin/runtimes'
+      - name: Archive Release
+        uses: thedoctor0/zip-release@main
+        with:
+          type: "zip"
+          filename: "WizNoteExporter.zip"
+          exclusions: "/bin/runtimes"
+
+      - name: Upload Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "WizNoteExporter.zip"
+          token: ${{ secrets.GITHUB_TOKEN }}
