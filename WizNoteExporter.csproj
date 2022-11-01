@@ -5,13 +5,15 @@
         <TargetFramework>net6.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <UseWPF>true</UseWPF>
+        <OutDir>bin</OutDir>
+        <Platforms>x64</Platforms>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="HtmlAgilityPack" Version="1.11.38" />
-      <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.0" />
-      <PackageReference Include="Mindbox.Data.Linq" Version="5.0.0" />
-      <PackageReference Include="WindowsAPICodePack" Version="1.1.2" />
+        <PackageReference Include="HtmlAgilityPack" Version="1.11.38" />
+        <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.0" />
+        <PackageReference Include="Mindbox.Data.Linq" Version="5.0.0" />
+        <PackageReference Include="WinCopies.WindowsAPICodePack.Shell" Version="3.11.0.1-preview" />
     </ItemGroup>
 
 </Project>
