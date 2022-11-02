@@ -108,6 +108,13 @@
           "WinCopies.WindowsAPICodePack.Consts": "3.11.0-preview"
         }
       }
+    },
+    "net6.0-windows7.0/win-x64": {
+      "SQLitePCLRaw.lib.e_sqlite3": {
+        "type": "Transitive",
+        "resolved": "2.0.4",
+        "contentHash": "oetvmtDZOE4Nnrtxd8Trapl9geBiu0rDCUXff46qGYjnUwzaU1mZ3OHnfR402tl32rx8gBWg3n5OBRaPJRbsGw=="
+      }
     }
   }
 }
