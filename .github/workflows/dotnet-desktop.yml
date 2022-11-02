@@ -35,9 +35,10 @@ jobs:
       - name: Archive Release
         uses: thedoctor0/zip-release@main
         with:
-          type: "zip"
-          filename: "WizNoteExporter.zip"
-          exclusions: "/bin/runtimes"
+          type: zip
+          filename: WizNoteExporter.zip
+          path: bin
+          exclusions: /bin/runtimes
 
       - name: Upload Release
         uses: svenstaro/upload-release-action@v2
