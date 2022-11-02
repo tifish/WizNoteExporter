@@ -37,7 +37,7 @@ jobs:
         run: nuget restore WizNoteExporter.sln
 
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build --no-restore
 
       - name: Archive Release
         uses: thedoctor0/zip-release@main
