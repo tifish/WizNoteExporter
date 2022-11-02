@@ -11,9 +11,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.38" />
-        <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.0" />
-        <PackageReference Include="Mindbox.Data.Linq" Version="5.0.0" />
+        <PackageReference Include="HtmlAgilityPack" Version="1.11.46" />
+        <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
         <PackageReference Include="WinCopies.WindowsAPICodePack.Shell" Version="3.11.0.1-preview" />
     </ItemGroup>
 

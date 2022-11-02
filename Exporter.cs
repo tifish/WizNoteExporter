@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Linq;
-using System.Data.Linq.Mapping;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -9,7 +7,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using HtmlAgilityPack;
-using Microsoft.Data.Sqlite;
+using SQLite;
 
 namespace WizNoteExporter;
 
@@ -28,14 +26,13 @@ class Exporter
     {
         var stopWatch = Stopwatch.StartNew();
 
-        using var sqlite = new SqliteConnection($@"Data Source={accountDirectory}\index.db");
-        using var context = new DataContext(sqlite);
+        using var db = new SQLiteConnection(Path.Combine(accountDirectory, "index.db"));
 
         var count = 0;
 
         var wizDocuments = new Dictionary<string, string>();
 
-        foreach (var doc in context.GetTable<WizDocument>())
+        foreach (var doc in db.Table<WizDocument>())
         {
             var ziwFilePath = accountDirectory + doc.Location + doc.FileName;
 
@@ -63,7 +60,7 @@ class Exporter
         }
 
         // 检查附件是否已经下载
-        foreach (var wizAttachment in context.GetTable<WizAttachment>())
+        foreach (var wizAttachment in db.Table<WizAttachment>())
         {
             wizDocuments.TryGetValue(wizAttachment.DocumentGUID, out var ziwFilePath);
             if (ziwFilePath == null)
@@ -85,35 +82,35 @@ class Exporter
         Console.WriteLine($"{count} files processed in {stopWatch.Elapsed.TotalSeconds} seconds.");
     }
 
-    [Table(Name = "WIZ_DOCUMENT")]
+    [Table("WIZ_DOCUMENT")]
     private class WizDocument
     {
-        [Column(Name = "DOCUMENT_GUID")]
+        [Column("DOCUMENT_GUID")]
         public string GUID { get; set; }
 
-        [Column(Name = "DOCUMENT_TITLE")]
+        [Column("DOCUMENT_TITLE")]
         public string Title { get; set; }
 
-        [Column(Name = "DOCUMENT_LOCATION")]
+        [Column("DOCUMENT_LOCATION")]
         public string Location { get; set; }
 
-        [Column(Name = "DOCUMENT_NAME")]
+        [Column("DOCUMENT_NAME")]
         public string FileName { get; set; }
 
-        [Column(Name = "DT_DATA_MODIFIED")]
+        [Column("DT_DATA_MODIFIED")]
         public string ModifiedTime { get; set; }
 
-        [Column(Name = "WIZ_DOWNLOADED")]
+        [Column("WIZ_DOWNLOADED")]
         public int Downloaded { get; set; }
     }
 
-    [Table(Name = "WIZ_DOCUMENT_ATTACHMENT")]
+    [Table("WIZ_DOCUMENT_ATTACHMENT")]
     private class WizAttachment
     {
-        [Column(Name = "DOCUMENT_GUID")]
+        [Column("DOCUMENT_GUID")]
         public string DocumentGUID { get; set; }
 
-        [Column(Name = "ATTACHMENT_NAME")]
+        [Column("ATTACHMENT_NAME")]
         public string FileName { get; set; }
     }
 
