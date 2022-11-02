@@ -45,6 +45,6 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: WizNoteExporter.zip
-          tag: ${{ github.ref }}
+          tag: release
           overwrite: true
           body: "This is the latest release."
