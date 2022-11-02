@@ -40,7 +40,10 @@ jobs:
           exclusions: "/bin/runtimes"
 
       - name: Upload Release
-        uses: ncipollo/release-action@v1
+        uses: svenstaro/upload-release-action@v2
         with:
-          artifacts: "WizNoteExporter.zip"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: WizNoteExporter.zip
+          tag: ${{ github.ref }}
+          overwrite: true
+          body: "This is the latest release."
