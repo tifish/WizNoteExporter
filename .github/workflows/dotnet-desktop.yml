@@ -26,6 +26,13 @@ jobs:
       - name: Setup Nuget
         uses: Nuget/setup-nuget@v1.0.5
 
+      - uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: Restore nuget packages
         run: nuget restore WizNoteExporter.sln
 
