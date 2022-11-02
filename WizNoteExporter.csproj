@@ -6,7 +6,10 @@
         <Nullable>enable</Nullable>
         <UseWPF>true</UseWPF>
         <OutDir>bin</OutDir>
-        <Platforms>x64</Platforms>
+        <Platform>x64</Platform>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+        <SelfContained>false</SelfContained>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
 
