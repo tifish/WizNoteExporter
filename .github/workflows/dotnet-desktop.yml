@@ -26,18 +26,18 @@ jobs:
       - name: Setup Nuget
         uses: NuGet/setup-nuget@v1
 
-      - uses: actions/cache@v3
-        with:
-          path: ${{ github.workspace }}/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
+      # - uses: actions/cache@v3
+      #   with:
+      #     path: ${{ github.workspace }}/.nuget/packages
+      #     key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-nuget-
 
       - name: Restore nuget packages
         run: nuget restore WizNoteExporter.sln
 
       - name: Build
-        run: dotnet build --no-restore
+        run: dotnet build
 
       - name: Archive Release
         uses: thedoctor0/zip-release@main
