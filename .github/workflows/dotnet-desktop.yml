@@ -37,8 +37,8 @@ jobs:
         with:
           type: zip
           filename: WizNoteExporter.zip
-          path: bin
-          exclusions: /bin/runtimes
+          directory: bin
+          exclusions: runtimes
 
       - name: Upload Release
         uses: svenstaro/upload-release-action@v2
