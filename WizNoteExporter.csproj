@@ -14,9 +14,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.46" />
-        <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
-        <PackageReference Include="WinCopies.WindowsAPICodePack.Shell" Version="3.11.0.1-preview" />
+        <PackageReference Include="HtmlAgilityPack" Version="1.11.46"/>
+        <PackageReference Include="sqlite-net-pcl" Version="1.8.116"/>
+        <PackageReference Include="WinCopies.WindowsAPICodePack.Shell" Version="3.11.0.1-preview"/>
     </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="nbeauty2 WizNoteExporter Lib"/>
+    </Target>
 
 </Project>
