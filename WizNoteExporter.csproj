@@ -5,8 +5,8 @@
         <TargetFramework>net6.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <UseWPF>true</UseWPF>
-        <OutDir>bin</OutDir>
-        <Platform>x64</Platform>
+        <OutDir>WizNoteExporter</OutDir>
+        <PlatformTarget>x64</PlatformTarget>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <SelfContained>false</SelfContained>
