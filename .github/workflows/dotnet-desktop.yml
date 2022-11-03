@@ -24,7 +24,7 @@ jobs:
       - name: Setup Nuget
         uses: NuGet/setup-nuget@v1
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v2
         with:
           path: ${{ github.workspace }}/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
