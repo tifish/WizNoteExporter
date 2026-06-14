@@ -158,6 +158,16 @@ class Exporter
         ".ts",
     };
 
+    // Tags whose subtree is dropped entirely: scripts, styles, embedded media without useful
+    // text, form controls, VML, Wiz/HTML internals.
+    private static readonly HashSet<string> _skipTags = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "script", "noscript", "style", "link", "meta", "title",
+        "iframe", "embed", "object", "canvas", "svg", "audio", "video",
+        "input", "select", "option", "optgroup", "textarea", "button",
+        "v:shapetype", "wiz_tmp_caret", "#comment",
+    };
+
     private HtmlDocument _htmlDoc = null!;
     private StringBuilder _output = null!;
     private string _outputFile = null!;
@@ -466,6 +476,10 @@ class Exporter
     private void ProcessContent(HtmlNode contentNode)
     {
         foreach (var childNode in contentNode.ChildNodes)
+        {
+            if (_skipTags.Contains(childNode.Name))
+                continue;
+
             switch (childNode.Name)
             {
                 case "pre":
@@ -489,9 +503,34 @@ class Exporter
                     TrimAndAddLineEnding(_output);
                     break;
 
+                case "hr":
+                    if (_exportFormat == ExportFormat.Markdown)
+                    {
+                        if (_output.Length > 0 && _output[^1] != '\n')
+                            TrimAndAddLineEnding(_output);
+                        EnsureBlankLine(_output);
+                        _output.Append("---").Append(LineEnding);
+                        EnsureBlankLine(_output);
+                    }
+                    else if (_forceText)
+                    {
+                        if (_output.Length > 0 && _output[^1] != '\n')
+                            TrimAndAddLineEnding(_output);
+                    }
+                    else
+                    {
+                        throw new Exception(
+                            $"Unexpected tag \"{childNode.Name}\" for text file \"{_outputFile}\""
+                        );
+                    }
+                    break;
+
                 case "img":
                     {
-                        var src = childNode.Attributes["src"].Value;
+                        var srcAttr = childNode.Attributes["src"];
+                        if (srcAttr == null)
+                            break;
+                        var src = srcAttr.Value;
                         if (src.StartsWith("index_files/"))
                         {
                             var imgFileName = src["index_files/".Length..];
@@ -681,18 +720,23 @@ class Exporter
                         EnsureBlankLine(_output);
                     break;
 
-                case "wiz_tmp_caret":
-                case "#comment":
-                case "style":
-                case "meta":
-                case "title":
-                    continue;
-
                 default:
+                    if (_forceText)
+                    {
+                        // Best-effort: descend into unknown tags so we don't lose content.
+                        // Covers HTML5 semantic tags (section/article/header/footer/figure/...),
+                        // inline tags we don't format (abbr/time/sup/sub/wbr/mark/...),
+                        // editor wrappers (wiz_marker/wiz-editor-doc/ignore_js_op/byte-sheet-html-origin/ne-clipboard/...),
+                        // Office XML namespaces (o:p/u1:p/u5:p/...),
+                        // and malformed Word-pasted tags like spanlang="en-us" (attribute joined into tag name).
+                        ProcessContent(childNode);
+                        break;
+                    }
                     throw new Exception(
                         $"Unexpected tag \"{childNode.Name}\" in \"{_outputFile}\""
                     );
             }
+        }
     }
 
     private void WrapInlineMarkdown(string openMarker, HtmlNode node, string? closeMarker = null)
