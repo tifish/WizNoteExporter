@@ -8,6 +8,12 @@
         "resolved": "1.12.4",
         "contentHash": "ljqvBabvFwKoLniuoQKO8b5bJfJweKLs4fUNS/V5dsvpo0A8MlJqxxn9XVmP2DaskbUXty6IYaWAi1SArGIMeQ=="
       },
+      "nulastudio.NetBeauty": {
+        "type": "Direct",
+        "requested": "[2.1.5, )",
+        "resolved": "2.1.5",
+        "contentHash": "+88sEKa7vRNC5aYvyajGkzFHcXrwshM921i4/J/GMtJdCw7I0LFvmmgoaDDgTOPJE9zCi1yzBOUVZPSGfYFjkA=="
+      },
       "sqlite-net-pcl": {
         "type": "Direct",
         "requested": "[1.9.172, )",
@@ -15,16 +21,6 @@
         "contentHash": "go533+huyvg5bOMmCpX+DyvLrcVRiEBIpqEiDHgXRijWIBBNkWnyMr/w+5ZzrUArKY+4ApucsbBnFtP3QITrJg==",
         "dependencies": {
           "SQLitePCLRaw.bundle_green": "2.1.2"
-        }
-      },
-      "WinCopies.WindowsAPICodePack.Shell": {
-        "type": "Direct",
-        "requested": "[3.11.0.1-preview, )",
-        "resolved": "3.11.0.1-preview",
-        "contentHash": "6TF7xnLk/8XiQAp9X9nL5zSTVEwg2yQ+3ca3t8Gifznmj27ELoSUefFzPu3HDJEOfvZus7xbO14aSSyiKZqxNQ==",
-        "dependencies": {
-          "WinCopies.Collections": "3.18.0-preview",
-          "WinCopies.WindowsAPICodePack": "3.11.0-preview"
         }
       },
       "SQLitePCLRaw.bundle_green": {
@@ -52,51 +48,6 @@
         "contentHash": "lxCZarZdvAsMl2zw9bXHrXK6RxVhB4b23iTFhCOdHFhxfbsxLxWf+ocvswJwR/9Wh/E//ddMi+wJGqUKV7VwoA==",
         "dependencies": {
           "SQLitePCLRaw.core": "2.1.2"
-        }
-      },
-      "WinCopies.Collections": {
-        "type": "Transitive",
-        "resolved": "3.18.0-preview",
-        "contentHash": "oEBruJgevjsJgO6x/QpdLOIxGubHCD/GC6I9Yc7Cb47HuFbKCrAKY/NaqsJvHa9bBDNWMkQkcH3RlhkOZccNDA==",
-        "dependencies": {
-          "WinCopies.Util": "3.18.0"
-        }
-      },
-      "WinCopies.Util": {
-        "type": "Transitive",
-        "resolved": "3.18.0",
-        "contentHash": "dQPghJN2NnLgavD/WO/pXVuGMHCeshCxR83Em2+UHokxolu+vpBcnU3AFzU+higBKJdojfyQgG2elCB8h9fCRg=="
-      },
-      "WinCopies.WindowsAPICodePack": {
-        "type": "Transitive",
-        "resolved": "3.11.0-preview",
-        "contentHash": "iuGzhUyj9LNlSqtQYdsygzCrKMcHfVknIUcPyVG4tBm5FyLloj53JdxV4EFq83hB9H8aJ36igLBx99M/+wZUZQ==",
-        "dependencies": {
-          "WinCopies.Collections": "3.18.0-preview",
-          "WinCopies.WindowsAPICodePack.COMNative": "3.11.0-preview"
-        }
-      },
-      "WinCopies.WindowsAPICodePack.COMNative": {
-        "type": "Transitive",
-        "resolved": "3.11.0-preview",
-        "contentHash": "J+TJH9wf9XmKts98P/x8F7j/jE1M0uxdhDrPMSw6mcUoi3hDWdYa9/F6NeI2EK1+uwPpRQXbuiotGmhqet4D+A==",
-        "dependencies": {
-          "WinCopies.Collections": "3.18.0-preview",
-          "WinCopies.WindowsAPICodePack.Win32Native": "3.11.0-preview"
-        }
-      },
-      "WinCopies.WindowsAPICodePack.Consts": {
-        "type": "Transitive",
-        "resolved": "3.11.0-preview",
-        "contentHash": "ZFo/qYELgBKfWuMusoPsMohwzIhiVvt2lc6G82CIaTrYWJYZIuhRWDjp+YWCyDRJWlslSf/WSXVVeG2yMz9wJA=="
-      },
-      "WinCopies.WindowsAPICodePack.Win32Native": {
-        "type": "Transitive",
-        "resolved": "3.11.0-preview",
-        "contentHash": "/avaPxKlxmBLRJIxQPtT2qnQb20j6KchfIXZ1DKnUNaV6l4kZg7kO/2EOpoQ0z1fxU3+9eD829va+xH2WCcTMg==",
-        "dependencies": {
-          "WinCopies.Util": "3.18.0",
-          "WinCopies.WindowsAPICodePack.Consts": "3.11.0-preview"
         }
       }
     },

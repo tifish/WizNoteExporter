@@ -9,19 +9,25 @@
         <PlatformTarget>x64</PlatformTarget>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+        <PublishDir>$(OutDir)</PublishDir>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <BeautySharedRuntimeMode>False</BeautySharedRuntimeMode>
+        <BeautyLibsDir Condition="$(BeautySharedRuntimeMode) == 'True'">../Lib</BeautyLibsDir>
+        <BeautyLibsDir Condition="$(BeautySharedRuntimeMode) != 'True'">./Lib</BeautyLibsDir>
+        <DisableBeauty>False</DisableBeauty>
+        <BeautyOnPublishOnly>False</BeautyOnPublishOnly>
+        <BeautyNoRuntimeInfo>False</BeautyNoRuntimeInfo>
+        <BeautyEnableDebugging>False</BeautyEnableDebugging>
+        <BeautyUsePatch>True</BeautyUsePatch>
+        <BeautyLogLevel>Info</BeautyLogLevel>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
+        <PackageReference Include="nulastudio.NetBeauty" Version="2.1.5" />
         <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
-        <PackageReference
-      Include="WinCopies.WindowsAPICodePack.Shell"
-      Version="3.11.0.1-preview"
-    />
     </ItemGroup>
-
-    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-        <Exec Command="nbeauty2 WizNoteExporter Lib" />
-    </Target>
 
 </Project>

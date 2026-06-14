@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
-using Microsoft.WindowsAPICodePack.Dialogs;
+using Microsoft.Win32;
 
 namespace WizNoteExporter;
 
@@ -32,10 +32,16 @@ public partial class MainWindow : Window
 
     private void SelectOutputDirButton_Click(object sender, RoutedEventArgs e)
     {
-        var dlg = new CommonOpenFileDialog { IsFolderPicker = true };
+        var dlg = new OpenFolderDialog
+        {
+            Title = "选择输出目录",
+            InitialDirectory = Directory.Exists(outputDirTextBox.Text)
+                ? Path.GetFullPath(outputDirTextBox.Text)
+                : Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+        };
 
-        if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
-            outputDirTextBox.Text = dlg.FileName;
+        if (dlg.ShowDialog(this) == true)
+            outputDirTextBox.Text = dlg.FolderName;
     }
 
     [DllImport("Kernel32")]
