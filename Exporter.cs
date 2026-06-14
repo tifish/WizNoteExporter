@@ -168,6 +168,7 @@ class Exporter
     private ZipArchive _zip = null!;
     private DateTime _modifiedTime;
     private int _listDepth;
+    private int _firstHeadingLevel;
 
     public void ExportZiw(string ziwFile, string title, DateTime modifiedTime)
     {
@@ -277,6 +278,8 @@ class Exporter
     private void ExportDocument()
     {
         _output = new StringBuilder();
+        _firstHeadingLevel = 0;
+        _listDepth = 0;
 
         var titleExt = Path.GetExtension(_title).ToLower();
         if (titleExt == ".md")
@@ -640,6 +643,16 @@ class Exporter
                 case "h4":
                 case "h5":
                 case "h6":
+                    if (_exportFormat == ExportFormat.Markdown)
+                        EmitHeading(childNode, childNode.Name[1] - '0');
+                    else if (_forceText)
+                        ProcessContent(childNode);
+                    else
+                        throw new Exception(
+                            $"Unexpected tag \"{childNode.Name}\" for text file \"{_outputFile}\""
+                        );
+                    break;
+
                 case "label":
                 case "header":
                 case "figure":
@@ -695,6 +708,27 @@ class Exporter
         }
 
         _output.Append(openMarker).Append(inner).Append(closeMarker ?? openMarker);
+    }
+
+    private void EmitHeading(HtmlNode node, int level)
+    {
+        var saved = _output;
+        _output = new StringBuilder();
+        ProcessContent(node);
+        var inner = _output.ToString().Trim();
+        _output = saved;
+
+        if (inner.Length == 0)
+            return;
+
+        if (_firstHeadingLevel == 0)
+            _firstHeadingLevel = level;
+        var outLevel = Math.Clamp(level - _firstHeadingLevel + 2, 1, 6);
+
+        if (_output.Length > 0 && _output[^1] != '\n')
+            TrimAndAddLineEnding(_output);
+        _output.Append(new string('#', outLevel)).Append(' ').Append(inner).Append(LineEnding);
+        EnsureBlankLine(_output);
     }
 
     private void EmitList(HtmlNode listNode, bool ordered)
