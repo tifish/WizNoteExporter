@@ -175,6 +175,12 @@ class Exporter
         _title = ToValidFileName(title);
         _modifiedTime = modifiedTime;
 
+        if (IsEncryptedZiw(_ziwFile))
+        {
+            Console.Error.WriteLine($"加密笔记，已跳过：{_ziwFile}");
+            return;
+        }
+
         // 加载index.html文档
         using (_zip = ZipFile.OpenRead(_ziwFile))
         {
@@ -199,6 +205,13 @@ class Exporter
             // 解压index_files/
             ExtractIndexFiles();
         }
+    }
+
+    private static bool IsEncryptedZiw(string path)
+    {
+        using var fs = File.OpenRead(path);
+        Span<byte> buf = stackalloc byte[4];
+        return fs.Read(buf) == 4 && buf[0] == (byte)'Z' && buf[1] == (byte)'I' && buf[2] == (byte)'W' && buf[3] == (byte)'R';
     }
 
     private static string ToValidFileName(string fileName)
