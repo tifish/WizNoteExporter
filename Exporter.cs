@@ -27,6 +27,8 @@ class Exporter
     {
         var stopWatch = Stopwatch.StartNew();
 
+        _claimedTitlePaths.Clear();
+
         using var db = new SQLiteConnection(Path.Combine(accountDirectory, "index.db"));
 
         var count = 0;
@@ -165,6 +167,7 @@ class Exporter
     private string _ziwFile = null!;
     private ZipArchive _zip = null!;
     private DateTime _modifiedTime;
+    private int _listDepth;
 
     public void ExportZiw(string ziwFile, string title, DateTime modifiedTime)
     {
@@ -192,6 +195,7 @@ class Exporter
             _titlePath = Path.Combine(Path.GetDirectoryName(_ziwFile)!, _title);
             var relTitlePath = Path.GetRelativePath(_accountDirectory, _titlePath);
             _outputTitlePath = Path.Combine(_outputDirectory, relTitlePath);
+            _outputTitlePath = DedupeTitlePath(_outputTitlePath);
             EnsureDirectory(_outputTitlePath);
             _outputDir = Path.GetDirectoryName(_outputTitlePath)!;
 
@@ -211,7 +215,11 @@ class Exporter
     {
         using var fs = File.OpenRead(path);
         Span<byte> buf = stackalloc byte[4];
-        return fs.Read(buf) == 4 && buf[0] == (byte)'Z' && buf[1] == (byte)'I' && buf[2] == (byte)'W' && buf[3] == (byte)'R';
+        return fs.Read(buf) == 4
+            && buf[0] == (byte)'Z'
+            && buf[1] == (byte)'I'
+            && buf[2] == (byte)'W'
+            && buf[3] == (byte)'R';
     }
 
     private static string ToValidFileName(string fileName)
@@ -497,17 +505,83 @@ class Exporter
                     ProcessContent(childNode);
                     break;
 
+                case "b":
+                case "strong":
+                    if (_exportFormat == ExportFormat.Markdown)
+                        WrapInlineMarkdown("**", childNode);
+                    else if (_forceText)
+                        ProcessContent(childNode);
+                    else
+                        throw new Exception(
+                            $"Unexpected tag \"{childNode.Name}\" for text file \"{_outputFile}\""
+                        );
+                    break;
+
+                case "i":
+                case "em":
+                    if (_exportFormat == ExportFormat.Markdown)
+                        WrapInlineMarkdown("*", childNode);
+                    else if (_forceText)
+                        ProcessContent(childNode);
+                    else
+                        throw new Exception(
+                            $"Unexpected tag \"{childNode.Name}\" for text file \"{_outputFile}\""
+                        );
+                    break;
+
+                case "u":
+                    if (_exportFormat == ExportFormat.Markdown)
+                        WrapInlineMarkdown("<u>", childNode, "</u>");
+                    else if (_forceText)
+                        ProcessContent(childNode);
+                    else
+                        throw new Exception(
+                            $"Unexpected tag \"{childNode.Name}\" for text file \"{_outputFile}\""
+                        );
+                    break;
+
+                case "blockquote":
+                    if (_exportFormat == ExportFormat.Markdown)
+                        EmitBlockquote(childNode);
+                    else if (_forceText)
+                        ProcessContent(childNode);
+                    else
+                        throw new Exception(
+                            $"Unexpected tag \"{childNode.Name}\" for text file \"{_outputFile}\""
+                        );
+                    break;
+
+                case "ul":
+                case "ol":
+                    if (_exportFormat == ExportFormat.Markdown)
+                        EmitList(childNode, ordered: childNode.Name == "ol");
+                    else if (_forceText)
+                        ProcessContent(childNode);
+                    else
+                        throw new Exception(
+                            $"Unexpected tag \"{childNode.Name}\" for text file \"{_outputFile}\""
+                        );
+                    break;
+
+                case "li":
+                case "dl":
+                case "dt":
+                case "dd":
+                    if (_forceText)
+                        ProcessContent(childNode);
+                    else
+                        throw new Exception(
+                            $"Unexpected tag \"{childNode.Name}\" for text file \"{_outputFile}\""
+                        );
+                    break;
+
                 case "h1":
                 case "h2":
                 case "h3":
                 case "h4":
                 case "h5":
                 case "h6":
-                case "blockquote":
                 case "label":
-                case "b":
-                case "strong":
-                case "u":
                 case "header":
                 case "figure":
                 case "small":
@@ -527,6 +601,8 @@ class Exporter
                     ProcessContent(childNode);
                     if (_output.Length > 0 && _output[^1] != '\n')
                         TrimAndAddLineEnding(_output);
+                    if (_exportFormat == ExportFormat.Markdown)
+                        EnsureBlankLine(_output);
                     break;
 
                 case "wiz_tmp_caret":
@@ -541,6 +617,101 @@ class Exporter
                         $"Unexpected tag \"{childNode.Name}\" in \"{_outputFile}\""
                     );
             }
+    }
+
+    private void WrapInlineMarkdown(string openMarker, HtmlNode node, string? closeMarker = null)
+    {
+        var saved = _output;
+        _output = new StringBuilder();
+        ProcessContent(node);
+        var inner = _output.ToString();
+        _output = saved;
+
+        if (inner.Length == 0)
+            return;
+        if (string.IsNullOrWhiteSpace(inner))
+        {
+            _output.Append(inner);
+            return;
+        }
+
+        _output.Append(openMarker).Append(inner).Append(closeMarker ?? openMarker);
+    }
+
+    private void EmitList(HtmlNode listNode, bool ordered)
+    {
+        if (_output.Length > 0 && _output[^1] != '\n')
+            TrimAndAddLineEnding(_output);
+
+        var indent = new string(' ', _listDepth * 2);
+        var index = 1;
+
+        foreach (var child in listNode.ChildNodes)
+        {
+            if (child.Name != "li")
+                continue;
+
+            var saved = _output;
+            _output = new StringBuilder();
+            _listDepth++;
+            ProcessContent(child);
+            _listDepth--;
+            var inner = _output.ToString();
+            _output = saved;
+
+            inner = inner.TrimEnd('\r', '\n', ' ');
+            if (inner.Length == 0)
+                continue;
+
+            var marker = ordered ? $"{index}. " : "- ";
+            index++;
+            var contPad = new string(' ', marker.Length);
+
+            var lines = inner.Split('\n');
+            for (var i = 0; i < lines.Length; i++)
+            {
+                var line = lines[i].TrimEnd('\r');
+                if (i == 0)
+                {
+                    _output.Append(indent).Append(marker).Append(line).Append(LineEnding);
+                }
+                else if (line.Length == 0)
+                {
+                    _output.Append(LineEnding);
+                }
+                else if (line[0] == ' ')
+                {
+                    // already-indented line (nested list content) — pass through
+                    _output.Append(line).Append(LineEnding);
+                }
+                else
+                {
+                    _output.Append(indent).Append(contPad).Append(line).Append(LineEnding);
+                }
+            }
+        }
+    }
+
+    private void EmitBlockquote(HtmlNode node)
+    {
+        var saved = _output;
+        _output = new StringBuilder();
+        ProcessContent(node);
+        var inner = _output.ToString();
+        _output = saved;
+
+        inner = inner.TrimEnd('\r', '\n', ' ');
+        if (inner.Length == 0)
+            return;
+
+        if (_output.Length > 0 && _output[^1] != '\n')
+            TrimAndAddLineEnding(_output);
+
+        foreach (var rawLine in inner.Split('\n'))
+        {
+            var line = rawLine.TrimEnd('\r');
+            _output.Append("> ").Append(line).Append(LineEnding);
+        }
     }
 
     private void ExportHtml()
@@ -595,6 +766,25 @@ class Exporter
         output.Append(LineEnding);
     }
 
+    private static void EnsureBlankLine(StringBuilder output)
+    {
+        // count trailing '\n's (ignore '\r')
+        var nlCount = 0;
+        for (var i = output.Length - 1; i >= 0; i--)
+        {
+            if (output[i] == '\n')
+                nlCount++;
+            else if (output[i] != '\r')
+                break;
+        }
+
+        while (nlCount < 2)
+        {
+            output.Append(LineEnding);
+            nlCount++;
+        }
+    }
+
     private static void EnsureEndOfFile(StringBuilder output)
     {
         // Trim all line ending and spaces
@@ -641,6 +831,27 @@ class Exporter
                 var tempPath = Path.Combine(destDirName, subDir.Name);
                 DirectoryCopy(subDir.FullName, tempPath, copySubDirs);
             }
+    }
+
+    private static readonly HashSet<string> _claimedTitlePaths = new(
+        StringComparer.OrdinalIgnoreCase
+    );
+
+    // 同一文件夹下存在同名笔记时，第 2 个开始在标题末尾追加数字（保留扩展名）
+    private static string DedupeTitlePath(string titlePath)
+    {
+        var dir = Path.GetDirectoryName(titlePath)!;
+        var fileName = Path.GetFileName(titlePath);
+        var ext = Path.GetExtension(fileName);
+        var baseName = string.IsNullOrEmpty(ext)
+            ? fileName
+            : Path.GetFileNameWithoutExtension(fileName);
+
+        var candidate = titlePath;
+        var n = 2;
+        while (!_claimedTitlePaths.Add(candidate))
+            candidate = Path.Combine(dir, $"{baseName}{n++}{ext}");
+        return candidate;
     }
 
     private static void EnsureDirectory(string filePath)
