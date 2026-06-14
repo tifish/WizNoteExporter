@@ -86,19 +86,19 @@ class Exporter
     private class WizDocument
     {
         [Column("DOCUMENT_GUID")]
-        public string GUID { get; set; }
+        public string GUID { get; set; } = null!;
 
         [Column("DOCUMENT_TITLE")]
-        public string Title { get; set; }
+        public string Title { get; set; } = null!;
 
         [Column("DOCUMENT_LOCATION")]
-        public string Location { get; set; }
+        public string Location { get; set; } = null!;
 
         [Column("DOCUMENT_NAME")]
-        public string FileName { get; set; }
+        public string FileName { get; set; } = null!;
 
         [Column("DT_DATA_MODIFIED")]
-        public string ModifiedTime { get; set; }
+        public string ModifiedTime { get; set; } = null!;
 
         [Column("WIZ_DOWNLOADED")]
         public int Downloaded { get; set; }
@@ -108,10 +108,10 @@ class Exporter
     private class WizAttachment
     {
         [Column("DOCUMENT_GUID")]
-        public string DocumentGUID { get; set; }
+        public string DocumentGUID { get; set; } = null!;
 
         [Column("ATTACHMENT_NAME")]
-        public string FileName { get; set; }
+        public string FileName { get; set; } = null!;
     }
 
     private enum ExportFormat

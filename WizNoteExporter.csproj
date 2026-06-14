@@ -2,25 +2,26 @@
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFramework>net10.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <UseWPF>true</UseWPF>
         <OutDir>WizNoteExporter</OutDir>
         <PlatformTarget>x64</PlatformTarget>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-        <SelfContained>false</SelfContained>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.46"/>
-        <PackageReference Include="sqlite-net-pcl" Version="1.8.116"/>
-        <PackageReference Include="WinCopies.WindowsAPICodePack.Shell" Version="3.11.0.1-preview"/>
+        <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
+        <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+        <PackageReference
+      Include="WinCopies.WindowsAPICodePack.Shell"
+      Version="3.11.0.1-preview"
+    />
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-        <Exec Command="nbeauty2 WizNoteExporter Lib"/>
+        <Exec Command="nbeauty2 WizNoteExporter Lib" />
     </Target>
 
 </Project>
