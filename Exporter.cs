@@ -185,7 +185,17 @@ class Exporter
         }
 
         // 加载index.html文档
-        using (_zip = ZipFile.OpenRead(_ziwFile))
+        try
+        {
+            _zip = ZipFile.OpenRead(_ziwFile);
+        }
+        catch (InvalidDataException ex)
+        {
+            Console.Error.WriteLine($"损坏的笔记，已跳过：{_ziwFile}（{ex.Message}）");
+            return;
+        }
+
+        using (_zip)
         {
             using var indexHtml = _zip.GetEntry("index.html")!.Open();
             _htmlDoc = new HtmlDocument();
