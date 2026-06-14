@@ -52,10 +52,38 @@ public partial class MainWindow : Window
         if (accountListBox.SelectedIndex == -1)
             return;
 
-        AllocConsole();
-
         var accountDir = Path.Combine(_dataDir, (string)accountListBox.SelectedValue);
         var outputDir = Path.GetFullPath(outputDirTextBox.Text);
+
+        if (clearOutputDirCheckBox.IsChecked == true && Directory.Exists(outputDir))
+        {
+            var confirm = MessageBox.Show(
+                this,
+                $"将清空目录下所有文件和子目录：\n{outputDir}\n\n确定继续吗？",
+                "确认清空",
+                MessageBoxButton.OKCancel,
+                MessageBoxImage.Warning,
+                MessageBoxResult.Cancel
+            );
+            if (confirm != MessageBoxResult.OK)
+                return;
+
+            ClearDirectory(outputDir);
+        }
+
+        AllocConsole();
+
         Exporter.ExportAll(accountDir, outputDir);
+    }
+
+    private static void ClearDirectory(string dir)
+    {
+        foreach (var file in Directory.EnumerateFiles(dir))
+        {
+            File.SetAttributes(file, FileAttributes.Normal);
+            File.Delete(file);
+        }
+        foreach (var sub in Directory.EnumerateDirectories(dir))
+            Directory.Delete(sub, recursive: true);
     }
 }

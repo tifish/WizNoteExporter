@@ -15,6 +15,7 @@
             <Button Margin="4" Click="SelectOutputDirButton_Click" DockPanel.Dock="Right">选择</Button>
             <TextBox Name="outputDirTextBox" Margin="4">我的笔记</TextBox>
         </DockPanel>
+        <CheckBox Name="clearOutputDirCheckBox" Margin="6,4,4,4">导出前清空目标文件夹</CheckBox>
         <Button Margin="4" Click="ExportButton_Click">导出所有笔记</Button>
     </StackPanel>
 </Window>
