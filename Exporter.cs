@@ -6,6 +6,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using SQLite;
 
@@ -367,7 +368,54 @@ class Exporter
         var body = _htmlDoc.DocumentNode.SelectSingleNode("//body");
         _hasImg = false;
         ProcessContent(body);
+        NormalizeMarkdownHeadings(_output);
         EnsureEndOfFile(_output);
+    }
+
+    private static readonly Regex HeadingRegex = new(
+        @"^(#{1,6})[ \t]*(\S.*?)[ \t]*#*[ \t]*$",
+        RegexOptions.Compiled
+    );
+
+    private static readonly Regex FencedCodeRegex = new(@"^[ \t]*(```|~~~)", RegexOptions.Compiled);
+
+    private static void NormalizeMarkdownHeadings(StringBuilder output)
+    {
+        var text = output.ToString();
+        var lines = text.Split('\n');
+        var changed = false;
+        var inFence = false;
+        for (var i = 0; i < lines.Length; i++)
+        {
+            var line = lines[i];
+            var hasCr = line.EndsWith('\r');
+            var content = hasCr ? line[..^1] : line;
+
+            if (FencedCodeRegex.IsMatch(content))
+            {
+                inFence = !inFence;
+                continue;
+            }
+            if (inFence)
+                continue;
+
+            var match = HeadingRegex.Match(content);
+            if (!match.Success)
+                continue;
+
+            var fixedLine = $"{match.Groups[1].Value} {match.Groups[2].Value}";
+            if (fixedLine == content)
+                continue;
+
+            lines[i] = hasCr ? fixedLine + '\r' : fixedLine;
+            changed = true;
+        }
+
+        if (!changed)
+            return;
+
+        output.Clear();
+        output.Append(string.Join('\n', lines));
     }
 
     private void ProcessContent(HtmlNode contentNode)
