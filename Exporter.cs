@@ -585,6 +585,34 @@ class Exporter
                         );
                     break;
 
+                case "table":
+                    if (_exportFormat == ExportFormat.Markdown)
+                        EmitTable(childNode);
+                    else if (_forceText)
+                        EmitTableAsText(childNode);
+                    else
+                        throw new Exception(
+                            $"Unexpected tag \"{childNode.Name}\" for text file \"{_outputFile}\""
+                        );
+                    break;
+
+                case "thead":
+                case "tbody":
+                case "tfoot":
+                case "tr":
+                case "th":
+                case "td":
+                case "caption":
+                case "colgroup":
+                case "col":
+                    if (_forceText)
+                        ProcessContent(childNode);
+                    else
+                        throw new Exception(
+                            $"Unexpected tag \"{childNode.Name}\" for text file \"{_outputFile}\""
+                        );
+                    break;
+
                 case "h1":
                 case "h2":
                 case "h3":
@@ -699,6 +727,95 @@ class Exporter
                     _output.Append(indent).Append(contPad).Append(line).Append(LineEnding);
                 }
             }
+        }
+    }
+
+    private void EmitTable(HtmlNode tableNode)
+    {
+        var rows = new List<List<string>>();
+        CollectRows(tableNode, rows);
+
+        if (rows.Count == 0)
+            return;
+
+        var colCount = rows.Max(r => r.Count);
+        foreach (var row in rows)
+            while (row.Count < colCount)
+                row.Add(string.Empty);
+
+        if (_output.Length > 0 && _output[^1] != '\n')
+            TrimAndAddLineEnding(_output);
+        EnsureBlankLine(_output);
+
+        var header = rows[0];
+        var bodyStart = 1;
+        if (rows.Count == 1)
+        {
+            header = Enumerable.Repeat(string.Empty, colCount).ToList();
+            bodyStart = 0;
+        }
+
+        AppendTableRow(header);
+        _output.Append('|');
+        for (var i = 0; i < colCount; i++)
+            _output.Append(" --- |");
+        _output.Append(LineEnding);
+
+        for (var i = bodyStart; i < rows.Count; i++)
+            AppendTableRow(rows[i]);
+
+        EnsureBlankLine(_output);
+    }
+
+    private void CollectRows(HtmlNode node, List<List<string>> rows)
+    {
+        foreach (var child in node.ChildNodes)
+        {
+            if (child.Name == "tr")
+            {
+                var cells = new List<string>();
+                foreach (var cell in child.ChildNodes)
+                {
+                    if (cell.Name != "td" && cell.Name != "th")
+                        continue;
+
+                    var saved = _output;
+                    _output = new StringBuilder();
+                    ProcessContent(cell);
+                    var inner = _output.ToString();
+                    _output = saved;
+
+                    inner = inner.Replace("\r", string.Empty).Replace("\n", " ").Replace("|", "\\|").Trim();
+                    cells.Add(inner);
+                }
+                rows.Add(cells);
+            }
+            else if (child.Name is "thead" or "tbody" or "tfoot")
+            {
+                CollectRows(child, rows);
+            }
+        }
+    }
+
+    private void AppendTableRow(List<string> cells)
+    {
+        _output.Append('|');
+        foreach (var cell in cells)
+            _output.Append(' ').Append(cell).Append(" |");
+        _output.Append(LineEnding);
+    }
+
+    private void EmitTableAsText(HtmlNode tableNode)
+    {
+        var rows = new List<List<string>>();
+        CollectRows(tableNode, rows);
+
+        if (_output.Length > 0 && _output[^1] != '\n')
+            TrimAndAddLineEnding(_output);
+
+        foreach (var row in rows)
+        {
+            _output.Append(string.Join('\t', row)).Append(LineEnding);
         }
     }
 
