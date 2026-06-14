@@ -45,7 +45,10 @@ class Exporter
             }
 
             var modifiedTime = DateTime.ParseExact(
-                doc.ModifiedTime, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                doc.ModifiedTime,
+                "yyyy-MM-dd HH:mm:ss",
+                CultureInfo.InvariantCulture
+            );
             var exporter = new Exporter(accountDirectory, outputDirectory);
             try
             {
@@ -65,18 +68,20 @@ class Exporter
             wizDocuments.TryGetValue(wizAttachment.DocumentGUID, out var ziwFilePath);
             if (ziwFilePath == null)
             {
-                Console.Error.WriteLine($"Cannot find Document for attachment \"{wizAttachment.FileName}\"");
+                Console.Error.WriteLine(
+                    $"Cannot find Document for attachment \"{wizAttachment.FileName}\""
+                );
                 continue;
             }
 
             var attachmentFilePath =
-                ziwFilePath.RemoveExtension(".ziw") + "_Attachments/" +
-                ToValidFileName(wizAttachment.FileName)
-                    .Replace('\'', '-')
-                    .Replace(',', '-');
+                ziwFilePath.RemoveExtension(".ziw")
+                + "_Attachments/"
+                + ToValidFileName(wizAttachment.FileName).Replace('\'', '-').Replace(',', '-');
             if (!File.Exists(attachmentFilePath))
                 Console.Error.WriteLine(
-                    $"Cannot find attachment \"{wizAttachment.FileName}\" of document \"{ziwFilePath}\"");
+                    $"Cannot find attachment \"{wizAttachment.FileName}\" of document \"{ziwFilePath}\""
+                );
         }
 
         Console.WriteLine($"{count} files processed in {stopWatch.Elapsed.TotalSeconds} seconds.");
@@ -124,13 +129,26 @@ class Exporter
 
     private readonly string[] _sourceCodeExtensions =
     {
-        ".pas", ".dpr",
-        ".vbs", ".vb",
-        ".bat", ".cmd", ".sh", ".ps1",
+        ".pas",
+        ".dpr",
+        ".vbs",
+        ".vb",
+        ".bat",
+        ".cmd",
+        ".sh",
+        ".ps1",
         ".sln",
-        ".vcxproj", ".cpp", ".h", ".hpp",
-        ".csproj", ".cs", ".go",
-        ".py", ".lua", ".js", ".ts",
+        ".vcxproj",
+        ".cpp",
+        ".h",
+        ".hpp",
+        ".csproj",
+        ".cs",
+        ".go",
+        ".py",
+        ".lua",
+        ".js",
+        ".ts",
     };
 
     private HtmlDocument _htmlDoc = null!;
@@ -299,8 +317,10 @@ class Exporter
     private void ExtractIndexFiles()
     {
         var hasIndexFiles = false;
-        var picDirPath =
-            Path.Combine(_outputDir!, GetPictureDirName(_outputFile, _exportFormat == ExportFormat.Markdown));
+        var picDirPath = Path.Combine(
+            _outputDir!,
+            GetPictureDirName(_outputFile, _exportFormat == ExportFormat.Markdown)
+        );
         foreach (var entry in _zip.Entries)
         {
             if (entry.FullName is "index.html" or "wiz_mobile.html")
@@ -315,7 +335,10 @@ class Exporter
                 if (ext == ".css" && _exportFormat is ExportFormat.Markdown or ExportFormat.Text)
                     continue;
 
-                var entryOutputFile = Path.Combine(picDirPath, entry.FullName["index_files/".Length..]);
+                var entryOutputFile = Path.Combine(
+                    picDirPath,
+                    entry.FullName["index_files/".Length..]
+                );
                 EnsureDirectory(entryOutputFile);
                 entry.ExtractToFile(entryOutputFile, true);
 
@@ -380,7 +403,9 @@ class Exporter
                         {
                             var imgFileName = src["index_files/".Length..];
                             var picDir = GetPictureDirName(_outputFile, true, true);
-                            _output.Append($@"![{Path.ChangeExtension(imgFileName, null)}]({picDir}/{imgFileName})");
+                            _output.Append(
+                                $@"![{Path.ChangeExtension(imgFileName, null)}]({picDir}/{imgFileName})"
+                            );
                         }
                         else
                         {
@@ -396,7 +421,9 @@ class Exporter
                                         break;
                                 }
                             else
-                                _output.Append($@"![{Path.GetFileNameWithoutExtension(src)}]({src})");
+                                _output.Append(
+                                    $@"![{Path.GetFileNameWithoutExtension(src)}]({src})"
+                                );
                         }
 
                         _hasImg = true;
@@ -427,7 +454,9 @@ class Exporter
                     if (_forceText)
                         ProcessContent(childNode);
                     else
-                        throw new Exception($"Unexpected tag \"{childNode.Name}\" for text file \"{_outputFile}\"");
+                        throw new Exception(
+                            $"Unexpected tag \"{childNode.Name}\" for text file \"{_outputFile}\""
+                        );
                     break;
 
                 case "div":
@@ -447,15 +476,18 @@ class Exporter
                     continue;
 
                 default:
-                    throw new Exception($"Unexpected tag \"{childNode.Name}\" in \"{_outputFile}\"");
+                    throw new Exception(
+                        $"Unexpected tag \"{childNode.Name}\" in \"{_outputFile}\""
+                    );
             }
     }
 
     private void ExportHtml()
     {
         // 设置标题
-        var headNode = _htmlDoc.DocumentNode.SelectSingleNode("/html/head")
-                       ?? _htmlDoc.DocumentNode.SelectSingleNode("/head");
+        var headNode =
+            _htmlDoc.DocumentNode.SelectSingleNode("/html/head")
+            ?? _htmlDoc.DocumentNode.SelectSingleNode("/head");
         if (headNode == null)
         {
             Console.Error.WriteLine($"Cannot find <head> in {_ziwFile}");
@@ -490,8 +522,7 @@ class Exporter
     {
         // Trim all spaces
         var trimEndCount = 0;
-        while (trimEndCount < output.Length
-               && output[^(trimEndCount + 1)] is ' ')
+        while (trimEndCount < output.Length && output[^(trimEndCount + 1)] is ' ')
             trimEndCount++;
 
         output.Remove(output.Length - trimEndCount, trimEndCount);
@@ -507,8 +538,7 @@ class Exporter
     {
         // Trim all line ending and spaces
         var trimEndCount = 0;
-        while (trimEndCount < output.Length
-               && output[^(trimEndCount + 1)] is '\r' or '\n' or ' ')
+        while (trimEndCount < output.Length && output[^(trimEndCount + 1)] is '\r' or '\n' or ' ')
             trimEndCount++;
 
         output.Remove(output.Length - trimEndCount, trimEndCount);
@@ -527,8 +557,8 @@ class Exporter
 
         if (!dir.Exists)
             throw new DirectoryNotFoundException(
-                "Source directory does not exist or could not be found: "
-                + sourceDirName);
+                "Source directory does not exist or could not be found: " + sourceDirName
+            );
 
         var dirs = dir.GetDirectories();
 
@@ -568,7 +598,11 @@ class Exporter
         return result;
     }
 
-    private static string GetPictureDirName(string docFile, bool isMarkdown, bool escapeSpace = false)
+    private static string GetPictureDirName(
+        string docFile,
+        bool isMarkdown,
+        bool escapeSpace = false
+    )
     {
         var titleNoExt = Path.GetFileName(docFile).RemoveExtension(".txt", ".md", ".html");
         var dirName = titleNoExt + (isMarkdown ? ".assets" : "_files");

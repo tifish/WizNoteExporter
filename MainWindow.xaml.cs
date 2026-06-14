@@ -19,7 +19,9 @@ public partial class MainWindow : Window
 
         var documentDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         _dataDir = Path.Combine(documentDir, @"My Knowledge\Data");
-        Accounts = new ObservableCollection<string>(Directory.GetDirectories(_dataDir).Select(Path.GetFileName)!);
+        Accounts = new ObservableCollection<string>(
+            Directory.GetDirectories(_dataDir).Select(Path.GetFileName)!
+        );
 
         DataContext = this;
     }
@@ -30,10 +32,7 @@ public partial class MainWindow : Window
 
     private void SelectOutputDirButton_Click(object sender, RoutedEventArgs e)
     {
-        var dlg = new CommonOpenFileDialog
-        {
-            IsFolderPicker = true,
-        };
+        var dlg = new CommonOpenFileDialog { IsFolderPicker = true };
 
         if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
             outputDirTextBox.Text = dlg.FileName;
