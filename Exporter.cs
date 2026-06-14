@@ -286,6 +286,13 @@ class Exporter
             _forceText = true;
             ExportMarkdown();
         }
+        else if (titleExt == "")
+        {
+            _exportFormat = ExportFormat.Markdown;
+            _outputFile = _outputTitlePath + ".md";
+            _forceText = true;
+            ExportMarkdown();
+        }
         else if (titleExt == ".txt")
         {
             _exportFormat = ExportFormat.Text;
