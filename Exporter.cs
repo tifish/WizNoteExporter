@@ -551,6 +551,19 @@ class Exporter
                         );
                     break;
 
+                case "s":
+                case "strike":
+                case "del":
+                    if (_exportFormat == ExportFormat.Markdown)
+                        WrapInlineMarkdown("~~", childNode);
+                    else if (_forceText)
+                        ProcessContent(childNode);
+                    else
+                        throw new Exception(
+                            $"Unexpected tag \"{childNode.Name}\" for text file \"{_outputFile}\""
+                        );
+                    break;
+
                 case "blockquote":
                     if (_exportFormat == ExportFormat.Markdown)
                         EmitBlockquote(childNode);
