@@ -25,6 +25,9 @@ class Exporter
 
     public static void ExportAll(string accountDirectory, string outputDirectory)
     {
+        Log.Open(outputDirectory);
+        Log.Info($"Exporting from {accountDirectory} to {outputDirectory}");
+
         var stopWatch = Stopwatch.StartNew();
 
         _claimedTitlePaths.Clear();
@@ -43,7 +46,7 @@ class Exporter
 
             if (doc.Downloaded == 0)
             {
-                Console.Error.WriteLine($"Need download: {doc.Title}");
+                Log.Error($"Need download: {doc.Title}");
                 continue;
             }
 
@@ -59,7 +62,7 @@ class Exporter
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"导出 {ziwFilePath} 出错：{ex.Message}");
+                Log.Error($"导出 {ziwFilePath} 出错：{ex.Message}");
             }
 
             count++;
@@ -71,9 +74,7 @@ class Exporter
             wizDocuments.TryGetValue(wizAttachment.DocumentGUID, out var ziwFilePath);
             if (ziwFilePath == null)
             {
-                Console.Error.WriteLine(
-                    $"Cannot find Document for attachment \"{wizAttachment.FileName}\""
-                );
+                Log.Error($"Cannot find Document for attachment \"{wizAttachment.FileName}\"");
                 continue;
             }
 
@@ -82,12 +83,15 @@ class Exporter
                 + "_Attachments/"
                 + ToValidFileName(wizAttachment.FileName).Replace('\'', '-').Replace(',', '-');
             if (!File.Exists(attachmentFilePath))
-                Console.Error.WriteLine(
+                Log.Error(
                     $"Cannot find attachment \"{wizAttachment.FileName}\" of document \"{ziwFilePath}\""
                 );
         }
 
-        Console.WriteLine($"{count} files processed in {stopWatch.Elapsed.TotalSeconds} seconds.");
+        Log.Info($"{count} files processed in {stopWatch.Elapsed.TotalSeconds} seconds.");
+        if (Log.LogFilePath != null)
+            Log.Info($"Log saved to {Log.LogFilePath}");
+        Log.Close();
     }
 
     [Table("WIZ_DOCUMENT")]
@@ -181,7 +185,7 @@ class Exporter
 
         if (IsEncryptedZiw(_ziwFile))
         {
-            Console.Error.WriteLine($"加密笔记，已跳过：{_ziwFile}");
+            Log.Error($"加密笔记，已跳过：{_ziwFile}");
             return;
         }
 
@@ -192,7 +196,7 @@ class Exporter
         }
         catch (InvalidDataException ex)
         {
-            Console.Error.WriteLine($"损坏的笔记，已跳过：{_ziwFile}（{ex.Message}）");
+            Log.Error($"损坏的笔记，已跳过：{_ziwFile}（{ex.Message}）");
             return;
         }
 
@@ -352,7 +356,7 @@ class Exporter
         }
         else
         {
-            Console.WriteLine($"{_outputFile} has been modified, skip it.");
+            Log.Info($"{_outputFile} has been modified, skip it.");
         }
     }
 
@@ -393,7 +397,7 @@ class Exporter
         }
 
         if (_exportFormat is ExportFormat.Text && hasIndexFiles)
-            Console.WriteLine($"Txt file {_ziwFile} has index_files.");
+            Log.Info($"Txt file {_ziwFile} has index_files.");
     }
 
     private void ExportText()
@@ -904,7 +908,7 @@ class Exporter
             ?? _htmlDoc.DocumentNode.SelectSingleNode("/head");
         if (headNode == null)
         {
-            Console.Error.WriteLine($"Cannot find <head> in {_ziwFile}");
+            Log.Error($"Cannot find <head> in {_ziwFile}");
         }
         else
         {
