@@ -512,6 +512,7 @@ class Exporter
                 case "span":
                 case "a":
                 case "font":
+                case "o:p":
                     ProcessContent(childNode);
                     break;
 
