@@ -10,6 +10,7 @@
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <PublishDir>$(OutDir)</PublishDir>
+        <NoWarn>$(NoWarn);WPF0001</NoWarn>
     </PropertyGroup>
 
     <PropertyGroup>

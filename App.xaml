@@ -1,9 +1,9 @@
-﻿<Application x:Class="WizNoteExporter.App"
+<Application x:Class="WizNoteExporter.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:WizNoteExporter"
+             ThemeMode="System"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
     </Application.Resources>
 </Application>
